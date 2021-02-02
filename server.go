@@ -4,6 +4,7 @@ import (
   "fmt"
   "log"
   "time"
+  "strings"
   "net/http"
   "database/sql"
   "html/template"
@@ -49,9 +50,9 @@ func save(note Note) {
   checkErr(err)
 }
 
-func getAllNotes() []Note {
+func getAllNotes(userEmail string) []Note {
   var allNotes []Note
-  rows, noteErr := db.Query("select * from note")
+  rows, noteErr := db.Query(`select * from note WHERE author = $1;`, userEmail)
   checkErr(noteErr)
 
   for rows.Next() {
@@ -82,8 +83,7 @@ func handleUser(res http.ResponseWriter, req *http.Request) {
   }
   if req.Method == "POST" {
     userEmail, _ = req.FormValue("email"), req.FormValue("password")
-    //fmt.Println(getAllNotes())
-    userDash := UserDashboard{UserEmail: userEmail, AllNotes: getAllNotes()}
+    userDash := UserDashboard{UserEmail: userEmail, AllNotes: getAllNotes(userEmail)}
     tpl.ExecuteTemplate(res, "note-dash.html", userDash)
   }
 }
@@ -91,10 +91,10 @@ func handleUser(res http.ResponseWriter, req *http.Request) {
 func saveNote(res http.ResponseWriter, req *http.Request) {
   if req.Method == "POST" {
     //author := req.FormValue("author")
-    title := req.FormValue("title")
+    title := strings.Title(req.FormValue("title"))
     content := req.FormValue("content")
 
-    dtFormat := "01-02-2006 15:04:05 Mon"
+    dtFormat := "01-02-2006 15:04:05"
     curr := time.Now()
     noteDate := curr.Format(dtFormat)
 
@@ -107,7 +107,7 @@ func saveNote(res http.ResponseWriter, req *http.Request) {
     note := Note{Id: noteId.String(), Author: userEmail, Title: title, Content: content, CreatedAt: noteDate}
     save(note)
 
-    userDash := UserDashboard{UserEmail: userEmail, AllNotes: getAllNotes()}
+    userDash := UserDashboard{UserEmail: userEmail, AllNotes: getAllNotes(userEmail)}
     tpl.ExecuteTemplate(res, "note-dash.html", userDash)
   }
 }
@@ -118,7 +118,7 @@ func deleteNote(res http.ResponseWriter, req *http.Request) {
   _, err := db.Exec(delStmt, id)
   checkErr(err)
 
-  userDash := UserDashboard{UserEmail: userEmail, AllNotes: getAllNotes()}
+  userDash := UserDashboard{UserEmail: userEmail, AllNotes: getAllNotes(userEmail)}
   tpl.ExecuteTemplate(res, "note-dash.html", userDash)
 }
 
@@ -127,7 +127,7 @@ func updateNote(res http.ResponseWriter, req *http.Request) {
   fmt.Println(id)
 
   if req.Method == "GET" {
-    allNotes := getAllNotes()
+    allNotes := getAllNotes(userEmail)
     var noteToUpdate Note
 
     //find the note to update
@@ -154,7 +154,7 @@ func updateNote(res http.ResponseWriter, req *http.Request) {
     _, updateErr := db.Exec(updateStmt, userEmail, title, content, idn)
     checkErr(updateErr)
 
-    userDash := UserDashboard{UserEmail: userEmail, AllNotes: getAllNotes()}
+    userDash := UserDashboard{UserEmail: userEmail, AllNotes: getAllNotes(userEmail)}
     tpl.ExecuteTemplate(res, "note-dash.html", userDash)
   }
 }
@@ -163,7 +163,8 @@ func main() {
   defer db.Close()
   log.Println("Server running....")
 
-  http.HandleFunc("/user", handleUser)
+  http.HandleFunc("/", handleUser)
+  //http.HandleFunc("/user", handleUser)
   http.HandleFunc("/save-note", saveNote)
   http.HandleFunc("/delete-note", deleteNote)
   http.HandleFunc("/update-note", updateNote)

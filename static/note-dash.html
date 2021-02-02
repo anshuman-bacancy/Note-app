@@ -16,12 +16,20 @@
 </head>
 
 <body>
-  <div class="container">
-    <div><h6> Welcome, <strong>{{.UserEmail}}</strong></div>
-    <button data-target="modal1" class="btn modal-trigger">Add a note?</button>
-  <div/>
+  <nav>
+    <div class="container"> 
+      <div class="nav-wrapper">
+        <strong>{{.UserEmail}}</strong>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a class="button btn-small blue" href="/">Change user</a></li>
+          <li><button data-target="modal1" class="btn btn-small modal-trigger">Add a note</button></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-  <!-- Modal Structure -->
+
+  <!-- Modal for adding note -->
   <div id="modal1" class="modal">
     <div class="modal-content">
       <h4>Add note..</h4>
@@ -57,17 +65,19 @@
 
   <!-- CARD for displaying Notes -->
 
-  <div class="container">
+  <div class="" style="width:100%;">
     {{range .AllNotes}}
       <input type="text" value="{{.Id}}" hidden />
-      <div class="row" style="width:750px;">
-        <div class="col s12 m6">
+      <div class="row" style="width: 50%; float:left;">
+        <div class="col s6 m6">
           <div class="card blue-grey darken-1">
             <div class="card-content white-text">
               <span class="card-title">{{.Title}}</span>
               <p>{{.Content}}</p>
             </div>
             <div class="card-action">
+              <button class="btn-small disabled"><b>{{.CreatedAt}}</b></button>
+              <!--&ensp; &ensp; &ensp; &ensp; &ensp; &emsp; &emsp; &emsp; -->
               <a href="/delete-note?id={{.Id}}" class="btn btn-small red"><i class="material-icons">remove</i></a> 
               <a href="/update-note?id={{.Id}}" class="btn btn-small orange"><i class="material-icons">edit</i></a>
             </div>
