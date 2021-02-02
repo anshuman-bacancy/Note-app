@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <!-- Modal animation -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var elems = document.querySelectorAll('.modal');
+      var instances = M.Modal.init(elems, "");
+    });
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <div><h6> Welcome, <strong>{{.UserEmail}}</strong></div>
+    <button data-target="modal1" class="btn modal-trigger">Add a note?</button>
+  <div/>
+
+  <!-- Modal Structure -->
+  <div id="modal1" class="modal">
+    <div class="modal-content">
+      <h4>Add note..</h4>
+      <form method="POST">
+      <div class="row">
+        <div class="form-group col-lg-1">
+          <label for="author">Author</label>
+          <input type="text" name="author" value="{{.UserEmail}}" class="form-control" disabled />
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group col-lg-1">
+          <label for="title">Title</label>
+          <input type="text" name="title" class="form-control" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group col-lg-1">
+          <label for="content">Content</label>
+            <textarea id="note-body" name="content" class="materialize-textarea"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button formaction="/save-note" class="btn modal-trigger">save note</button>
+        <!--<a href="#!" class="modal-close waves-effect waves-green btn-flat">Save note</a> -->
+      </form>
+    </div>
+    </div>
+  </div>
+
+
+
+  <!-- CARD for displaying Notes -->
+
+  <div class="container">
+    {{range .AllNotes}}
+      <input type="text" value="{{.Id}}" hidden />
+      <div class="row" style="width:750px;">
+        <div class="col s12 m6">
+          <div class="card blue-grey darken-1">
+            <div class="card-content white-text">
+              <span class="card-title">{{.Title}}</span>
+              <p>{{.Content}}</p>
+            </div>
+            <div class="card-action">
+              <a href="/delete-note?id={{.Id}}" class="btn btn-small red"><i class="material-icons">remove</i></a> 
+              <a href="/update-note?id={{.Id}}" class="btn btn-small orange"><i class="material-icons">edit</i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {{end}}
+  </div>
+
+</body>
+</html>
